@@ -1,0 +1,63 @@
+Did your team encounter a problem with subscriptions when working on the python implementation? I tried to subscribe to a specific device (SST/1/#) after I received its join message, but the subscription call fails after several seconds. The DGI instead subscribes to the entire class of devices (SST/# for now, configurable later) when it starts, which isn't ideal but works.
+
+You will need to change the python code to send a non-pickled version of the JSON when a request comes from the DGI. The DGI will send a DEVICE/+/ACK message with the payload DGI when it expects to receive this non-pickled version. Here's how I implemented this change on our end using the unpicklable=False argument:
+
+ if(self.p_type == 0):
+            if(split_topic[2] == 'ACK'):
+                if(msg.payload == 'ACK'):
+                    self.mqttc.publish(
+                        str(self.dev_topic) + '/JSON', str(self.profile))
+                    if not (self.init_event.is_set()):
+                        self.init_event.set()
+                        self.init = 1
+                else:
+                    self.mqttc.publish(
+                        str(self.dev_topic) + '/JSON', str(jsonpickle.encode(self.device, unpicklable=False)))
+                    if not (self.init_event.is_set()):
+                        self.init_event.set()
+                        self.init = 1
+            else:
+                self.read_command(msg)
+
+-Tom
+
+----------------
+
+Tom,
+
+Even if you subscribe for entire class of devices ‘Join” msg, the child process which interact with these devices will only be spawned if they are under its controlled device list in conf/name.conf file.
+
+About unpickled JSON reception inside DGI, may I as why you need it unpickeled? Is your implementation in C or python? 
+
+Also, do you need anything else? How far has the DGI-MQTT integration come since I heard you are leaving soon and we need to sync up before that.
+
+Regards,
+Pratheek
+
+---------------
+
+The DGI implementation is in C++ and utilizes the C Paho MQTT client.
+
+In the current implementation, the DGI subscribes to a set of configurable devices at runtime (DEV/+/JSON, DEV/+/AOUT, and DEV/+/DOUT)  as well as the join and leave channel. It sends an ACK DGI message in response to a join and expects to receive an unpickled JSON device specification. It uses that specification to allocate storage for that device, which is retained until the corresponding leave message arrives. The variables used to store the data are accessed through the existing device management infrastructure in DGI.
+
+What causes the python MQTT client to send data updates?
+
+---------------
+
+Tom,
+
+If there is a changes in the data in python MQTT client, an update message will be sent.
+
+For example, if the local DRER has some updated value for a particular parameter, it communicates the change to local MQTT client through modbus interface and modifies the corresponding JSON file which python MQTT will be polling. If there is any change in the file, corresponding changes will be updates to subscribed devices. You can simulate this with simple application which puts random values to the JSON file which python MQTT will be polling.
+
+I have attached a sample python file which does something similar. It simulates control of DESD from SST by modifying JSON file related to DESD in the SST node. You can do something similar.
+
+
+Regards,
+Pratheek
+
+-----------------
+
+So as I understand it, there is not a script that would change AOUT / DOUT values to simulate the device's operation. There is a stub in the DGI to send an AIN value to the DESD to test that data path, but I will not be able to test the ability of the DGI to receive updated values over MQTT.
+
+I am going to make another small change to the python client code. Previously, the DGI sent a unique ACK DGI message to request the unpickled version of the file. It will now send the standard ACK ACK message, but will expect to receive an unpickled version of the device on a separate topic (for instance, JSON-DGI). I will modify the python code to publish two versions of the device, one pickled and one not, on two separate topics. This is a required fix to prevent the DGI from receiving a pickled JSON intended for an SST.

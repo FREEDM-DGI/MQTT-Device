@@ -1,0 +1,38 @@
+NCSU answers to Tom's questions from last week:
+
+
+I assume the client code is light weight and would have minimum performance impact on the DGI. If it was the client, the DGI would also not have to waste cycles to route messages when two devices need to communicate with each other independent of the DGI. However, we have to make the assumption that the DGI will be the first client running and will never crash. Otherwise, the DGI could appear after other clients are running and never register those devices.
+
+- DGI need not run first. We have implemented a code to handle this scenario (By sending join messages again by energy device if you receive a join message from DGI, also recursive joins are handled ). However, if DGI crashes, there might be problems. We can use Broker heartbeat functionality to tackle this.
+
+If the DGI is the broker, then it could fail without causing synchronization issues of certain devices being invisible to the DGI. However, it would require modification of the broker code to fit within the device framework of the DGI discussed at the meeting. These modifications may be non-trivial depending on the broker code base.
+
+- DGI is not Broker, Broker can be an open source application. We have not implemented any Broker logic, we just used some open source application like mosquito, or some android MQTT broker app.
+
+I think it makes the most sense for the DGI to be a client and to assume there is another piece of hardware associated with each SST that runs an MQTT server as the broker. However, I have no familiarity with MQTT and pose the question to NCSU: which approach makes more sense?
+
+- Yes. Broker can run on any device, including device which runs DGI, broker is lightweight too.
+
+Here are some limitations of the DGI that will affect MQTT after the integration:
+
+1) Each device profile must contain a field for device type (SST / DESD / DRER / load) so the DGI knows what to do with the device.
+
+- Yes, this will be part of device profile, DEV_NAME.
+
+2) The current architecture only supports floating point values, with the exception of the one field for device type. This means that all boolean and integer values must be sent as floats, and all string values such as vendor name will be dropped by the DGI and cannot be sent to the SCADA server through DNP3.
+
+- Yes, we need to figure out the alternative.
+
+3) The DGI will ignore all min and max values specified in the device specification and these values will not be visible to algorithm developers for range checking. We could come up with a work around for this by tripling the number of attributes such that ACTIVE_POWER becomes ACTIVE_POWER, ACTIVE_POWER_MIN, and ACTIVE_POWER_MAX if this is important.
+
+- Agree.
+
+4) If we decide to make DGI and MQTT client, it would be extremely inconvenient to use an excel specification file for its device profile. At the very least, the specification needs to be changed to a plain text format that can be edited in a text editor such as comma separated values (CSV).
+
+- If needed that we can create the device profile in excel and then save it as csv format.
+
+Here are some issues that don't affect the implementation but must be noted:
+
+1) The MQTT protocol does not seem to define a required heartbeat message that keeps track of which clients are currently active. As such, we are not implementing a plug and play protocol as the DGI will never know whether the devices it has registered are actually running. We must make the assumption that, although new devices can come online during run time, no device can ever fail or disconnect.
+
+- Yes, currently heartbeat is not there. But we can leverage heartbeat feature provided by broker to check if any subscribers are active or not.

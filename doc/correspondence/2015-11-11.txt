@@ -1,0 +1,27 @@
+Tom Asks:
+
+Could you send us an example of the content inside of each of the message types MQTTClient handles (join, leave, json, ack, ain)?
+
+What are the ACK and JSON messages used for?
+
+What do the different values for the attribute p_value in MQTTClient mean?
+
+Response:
+
+Here are the example messages,
+
+'join/DESD/1’
+'join/SST/1’
+'DESD/1/ACK’
+'DESD/1/JSON'
+
+this is between SST_1 and DESD_1.
+
+ACK is used to acknowledge DESD by SST that it has successfully received its join message and when DESD receives the ACK message from SST, it sends its device profile data/JSON file in the payload of JSON message.
+
+I am not sure what p_value you are asking about. Do you mean p_type? then, p_type means process type.
+
+Here a process is spawned for different scenarios. A native process is spawned to handle messages sent to native device on which MQTT is running (p_type = 0) and also a process for each remote controlled device is created (p_type 1).
+
+Regards,
+Pratheek
