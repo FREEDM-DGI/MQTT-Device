@@ -132,12 +132,11 @@ class DeviceProfile(object):
         self.start_time = (datetime.datetime.now())
         try:
             xfname = str('conf/profile/' + i_file_1) + '.xlsx'
-			cfname = str('conf/profile/' + i_file_1) + '.csv'
-			if(os.path.isfile(fname))
-            	book = xlrd.open_workbook(xfname)
-            	self.xlx_parser(book)
-        	elif
-        		self.csv_parser(open(cfname, 'rb'))
+            cfname = str('conf/profile/' + i_file_1) + '.csv'
+            if(os.path.isfile(xfname)):
+                self.xlx_parser(xlrd.open_workbook(xfname))
+            elif(os.path.isfile(cfname)):
+                self.csv_parser(open(cfname, 'rb'))
             self.file_1 = 'json/' + str(self.read_object(
                 'Dev_Name')) + '_' + str(int(self.read_object('Dev_HW_Ver'))) + '.json'
             self.set_initialized()
@@ -181,13 +180,13 @@ class DeviceProfile(object):
                 value = float(sh.cell(rx, 5).value)
             self.add_element(dtype, name, index, minimum, maximum, value)
 
-	def csv_parser(self, csvf):
-     	csvr = csv.reader(csvf, delimter=',', quotechar='"')
-      	for row in csvr:
-      		dtype = row[0]
-      		name = row[1]
-      		index = int(row[2])
-        	if(re.match(r'(.*)IN', str(dtype))):
+    def csv_parser(self, csvf):
+        csvr = csv.reader(csvf, delimter=',', quotechar='"')
+        for row in csvr:
+            dtype = row[0]
+            name = row[1]
+            index = int(row[2])
+            if(re.match(r'(.*)IN', str(dtype))):
                 self.Name_Hash[
                     str(name) + 'IN'] = str(dtype) + '/' + str(index)
             elif(re.match(r'(.*)OUT', str(dtype))):
