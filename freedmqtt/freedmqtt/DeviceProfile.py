@@ -5,10 +5,12 @@ from freedmqtt.switch import switch
 from freedmqtt.log import log, DEBUG, WARNING, EVENT, ERROR
 import json
 import jsonpickle
+import os.path
 import datetime
 import re
 import pdb
 import xlrd
+import csv
 import inspect
 if(sys.platform == 'win32'):
     import portalocker
@@ -129,12 +131,13 @@ class DeviceProfile(object):
         self.initialized = 0
         self.start_time = (datetime.datetime.now())
         try:
-            book = xlrd.open_workbook(
-                str('conf/profile/' + i_file_1) + '.xlsx')
-            self.native = 1
-            sh = book.sheet_by_index(1)
-            # print sh.name, sh.nrows, sh.ncols
-            self.xlx_parser(sh)
+            xfname = str('conf/profile/' + i_file_1) + '.xlsx'
+			cfname = str('conf/profile/' + i_file_1) + '.csv'
+			if(os.path.isfile(fname))
+            	book = xlrd.open_workbook(xfname)
+            	self.xlx_parser(book)
+        	elif
+        		self.csv_parser(open(cfname, 'rb'))
             self.file_1 = 'json/' + str(self.read_object(
                 'Dev_Name')) + '_' + str(int(self.read_object('Dev_HW_Ver'))) + '.json'
             self.set_initialized()
@@ -153,7 +156,10 @@ class DeviceProfile(object):
         self.app_name = str(app_name)
         log("Initialized bit:" + str(self.initialized), DEBUG)
 
-    def xlx_parser(self, sh):
+    def xlx_parser(self, book):
+        self.native = 1
+        sh = book.sheet_by_index(1)
+        # print sh.name, sh.nrows, sh.ncols
         for rx in range(sh.nrows):
             dtype = sh.cell(rx, 0).value
             name = sh.cell(rx, 1).value
@@ -174,6 +180,30 @@ class DeviceProfile(object):
             else:
                 value = float(sh.cell(rx, 5).value)
             self.add_element(dtype, name, index, minimum, maximum, value)
+
+	def csv_parser(self, csvf):
+     	csvr = csv.reader(csvf, delimter=',', quotechar='"')
+      	for row in csvr:
+      		dtype = row[0]
+      		name = row[1]
+      		index = int(row[2])
+        	if(re.match(r'(.*)IN', str(dtype))):
+                self.Name_Hash[
+                    str(name) + 'IN'] = str(dtype) + '/' + str(index)
+            elif(re.match(r'(.*)OUT', str(dtype))):
+                self.Name_Hash[
+                    str(name) + 'OUT'] = str(dtype) + '/' + str(index)
+            else:
+                self.Name_Hash[str(name)] = str(dtype) + '/' + str(index)
+            self.Topic_Hash[str(dtype) + '/' + str(index)] = str(name)
+            minimum = float(row[3])
+            maximum = float(row[4])
+            if (dtype == 'DEV_CHAR'):
+                value = (row[5])
+            else:
+                value = float(row[5])
+            self.add_element(dtype, name, index, minimum, maximum, value)
+
 
     def add_element(self, dtype, name, index, minimum, maximum, value):
         if(dtype == 'AOUT'):
