@@ -10,6 +10,7 @@ import re
 import pdb
 import xlrd
 import inspect
+import random	# Used solely for testing purposes
 if(sys.platform == 'win32'):
     import portalocker
     from portalocker import lock, unlock, LOCK_EX
@@ -32,7 +33,9 @@ class aout(object):
 
     def write(self, value):
         if (float(value) >= self.minimum and float(value) <= self.maximum):
-            self.value = float(value)
+            #self.value = float(value)
+	    # Random value generation for testing purposes
+	    self.value = random.randrange(self.minimum, self.maximum, 0.01)
         else:
             log('AOUT/' + str(self.index) + ': Write Out of Bounds', WARNING)
 
@@ -89,7 +92,9 @@ class dout(object):
 
     def write(self, value):
         if (int(value) >= self.minimum and int(value) <= self.maximum):
-            self.value = int(value)
+            #self.value = int(value)
+	    # Random value generation for testing purposes
+	    self.value = random.randrange(self.minimum, self.maximum, 0.01)
         else:
             log('DOUT/' + str(self.index) + ': Write Out of Bounds', WARNING)
 
