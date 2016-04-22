@@ -33,14 +33,13 @@ class aout(object):
 
     def write(self, value):
         if (float(value) >= self.minimum and float(value) <= self.maximum):
-            #self.value = float(value)
-	    # Random value generation for testing purposes
-	    self.value = random.randrange(self.minimum, self.maximum, 0.01)
+            self.value = float(value)
         else:
             log('AOUT/' + str(self.index) + ': Write Out of Bounds', WARNING)
 
     def read(self):
-        return self.value
+	# Random gen for testing purposes
+        return random.randrange(self.minimum, self.maximum, 0.01)
 
 
 class ain(object):
@@ -59,7 +58,8 @@ class ain(object):
             log('AIN/' + str(self.index) + ': Write Out of Bounds', WARNING)
 
     def read(self):
-        return self.value
+	# Random gen for testing purposes
+        return random.randrange(self.minimum, self.maximum, 0.01)
 
 
 class din(object):
@@ -78,7 +78,8 @@ class din(object):
             log('DIN/' + str(self.index) + ': Write Out of Bounds', WARNING)
 
     def read(self):
-        return self.value
+	# Random gen for testing purposes
+        return random.randrange(self.minimum, self.maximum, 0.01)
 
 
 class dout(object):
@@ -92,14 +93,13 @@ class dout(object):
 
     def write(self, value):
         if (int(value) >= self.minimum and int(value) <= self.maximum):
-            #self.value = int(value)
-	    # Random value generation for testing purposes
-	    self.value = random.randrange(self.minimum, self.maximum, 0.01)
+            self.value = int(value)
         else:
             log('DOUT/' + str(self.index) + ': Write Out of Bounds', WARNING)
 
     def read(self):
-        return self.value
+	# Random gen for testing purposes
+        return random.randrange(self.minimum, self.maximum, 0.01)
 
 
 class dev_char(object):
