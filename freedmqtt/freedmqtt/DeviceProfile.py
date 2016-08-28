@@ -10,6 +10,7 @@ import re
 import pdb
 import xlrd
 import inspect
+import random
 if(sys.platform == 'win32'):
     import portalocker
     from portalocker import lock, unlock, LOCK_EX
@@ -37,7 +38,7 @@ class aout(object):
             log('AOUT/' + str(self.index) + ': Write Out of Bounds', WARNING)
 
     def read(self):
-        return self.value
+        return random.uniform(self.minimum, self.maximum)
 
 
 class ain(object):
@@ -56,7 +57,7 @@ class ain(object):
             log('AIN/' + str(self.index) + ': Write Out of Bounds', WARNING)
 
     def read(self):
-        return self.value
+        return random.uniform(self.minimum, self.maximum)
 
 
 class din(object):
@@ -75,8 +76,7 @@ class din(object):
             log('DIN/' + str(self.index) + ': Write Out of Bounds', WARNING)
 
     def read(self):
-        return self.value
-
+        return random.uniform(self.minimum, self.maximum)
 
 class dout(object):
 
@@ -94,7 +94,7 @@ class dout(object):
             log('DOUT/' + str(self.index) + ': Write Out of Bounds', WARNING)
 
     def read(self):
-        return self.value
+        return random.uniform(self.minimum, self.maximum)
 
 
 class dev_char(object):
@@ -108,7 +108,7 @@ class dev_char(object):
         self.value = value
 
     def read(self):
-        return self.value
+        return random.uniform(self.minimum, self.maximum)
 
 
 class DeviceProfile(object):
